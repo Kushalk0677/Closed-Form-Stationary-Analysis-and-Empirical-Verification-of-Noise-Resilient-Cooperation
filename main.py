@@ -1,22 +1,3 @@
-#!/usr/bin/env python3
-"""
-Paper-Ready Simulation: Verifying Closed-Form Stationary Distributions
-TFT vs NAFT under Noise in Iterated Prisoner's Dilemma
-
-This script:
-- Simulates TFT and NAFT as memory-1 strategies
-- Constructs exact Markov transition matrices
-- Computes analytic stationary distributions (eigenvector method)
-- Estimates empirical stationary distributions (Monte Carlo)
-- Verifies ALL closed-form theorems from the LaTeX paper
-- Runs 1000 rounds per trial
-- Uses ALL CPU cores via multiprocessing
-- Outputs CSV datasets for reproducibility
-- Generates multiple plots (not duplicates)
-- Produces publishable numerical evidence
-
-No scope for error: deterministic seeds, assertions, diagnostics.
-"""
 
 import numpy as np
 import pandas as pd
@@ -26,9 +7,7 @@ import os
 import time
 from dataclasses import dataclass
 
-# ============================
-# GLOBAL CONFIGURATION
-# ============================
+
 
 ROUNDS = 10000
 TRIALS = 2000
@@ -36,24 +15,18 @@ CPU_CORES = mp.cpu_count()
 OUTPUT_DIR = "outputs"
 os.makedirs(OUTPUT_DIR, exist_ok=True)
 
-# Prisoner's Dilemma Payoffs
-T = 5  # Temptation
-R = 3  # Reward
-P = 1  # Punishment
-S = 0  # Sucker
+T = 5  
+R = 3  
+P = 1  
+S = 0  
 
-# States: CC, CD, DC, DD
 STATES = ["CC", "CD", "DC", "DD"]
 STATE_INDEX = {s: i for i, s in enumerate(STATES)}
-
-# ============================
-# STRATEGY DEFINITIONS
-# ============================
 
 @dataclass
 class Strategy:
     name: str
-    p: np.ndarray  # memory-1 probabilities
+    p: np.ndarray  
 
 TFT = Strategy("TFT", np.array([1, 0, 1, 0], dtype=float))
 
@@ -62,9 +35,6 @@ ALPHA = 0.6
 BETA = 0.2
 NAFT = Strategy("NAFT", np.array([1, ALPHA, 1, BETA], dtype=float))
 
-# ============================
-# CORE FUNCTIONS
-# ============================
 
 def noisy_action(p, epsilon, rng):
     intended = rng.random() < p
@@ -96,17 +66,15 @@ def build_transition_matrix(strategy1, strategy2, epsilon):
     return M
 
 
-# ============================
-# STATIONARY DISTRIBUTION
-# ============================
+
 
 def stationary_distribution(M):
-    # Robust stationary distribution solver with eigen + power iteration fallback
+    
     eigvals, eigvecs = np.linalg.eig(M.T)
     idx = np.argmin(np.abs(eigvals - 1))
     v = np.real(eigvecs[:, idx])
 
-    # If eigenvector is unstable, fallback to power iteration
+  
     if np.allclose(v, 0) or np.isnan(v).any():
         v = np.ones(M.shape[0]) / M.shape[0]
         for _ in range(10000):
@@ -115,7 +83,7 @@ def stationary_distribution(M):
                 break
             v = v_next
 
-    # Enforce valid probability simplex
+    
     v = np.maximum(v, 0)
     s = v.sum()
     if s == 0 or np.isnan(s):
@@ -125,9 +93,6 @@ def stationary_distribution(M):
     return v / s
 
 
-# ============================
-# CLOSED-FORM SOLUTIONS
-# ============================
 
 def closed_form_tft(epsilon):
     pi_conf = (2 * epsilon) / (1 + 2 * epsilon)
@@ -141,9 +106,7 @@ def closed_form_naft(epsilon, alpha):
     return np.array([pi_cc, pi_conf / 2, pi_conf / 2, 0])
 
 
-# ============================
-# MONTE CARLO SIMULATION
-# ============================
+
 
 def simulate_trial(args):
     strategy, epsilon, seed = args
@@ -161,9 +124,7 @@ def simulate_trial(args):
     return np.array([counts[s] for s in STATES]) / ROUNDS
 
 
-# ============================
-# PAYOFF CALCULATION
-# ============================
+
 
 def expected_payoff(pi):
     payoff_map = {
@@ -175,9 +136,6 @@ def expected_payoff(pi):
     return sum(pi[STATE_INDEX[s]] * payoff_map[s] for s in STATES)
 
 
-# ============================
-# MAIN EXPERIMENT LOOP
-# ============================
 
 from tqdm import tqdm
 
@@ -237,9 +195,7 @@ def run_experiment():
     return df
 
 
-# ============================
-# PLOTTING
-# ============================
+
 
 def plot_results(df):
     plt.figure()
@@ -269,28 +225,23 @@ def plot_results(df):
     plt.savefig(os.path.join(OUTPUT_DIR, "stationary_error.png"))
 
 
-# ============================
-# EXECUTION
-# ============================
 
 if __name__ == "__main__":
     start = time.time()
     df = run_experiment()
     plot_results(df)
 
-        # HARD ASSERTIONS FOR THEOREM VALIDATION
-
-    # NAFT dominance (empirical)
+        
+    
     assert (df["delta"] > 0).all(), "Dominance theorem violated!"
 
-    # NAFT closed-form accuracy (empirical vs closed-form)
-        # NAFT closed-form accuracy (report instead of hard-failing due to Monte Carlo variance)
+    
     max_naft_err = df["error_NAFT"].max()
     print("Max NAFT stationary error (empirical vs closed-form):", max_naft_err)
     if max_naft_err > 0.15:
         print("WARNING: NAFT error higher than expected — consider increasing TRIALS for tighter bounds.")
 
-    # TFT assertion disabled for now; log worst-case error for inspection
+  
     print("Max TFT stationary error (empirical vs closed-form):",
           df["error_TFT"].max())
 
@@ -299,3 +250,4 @@ if __name__ == "__main__":
     print("Runtime (seconds):", elapsed)
     print("CPU cores used:", CPU_CORES)
     print("Results saved to outputs/")
+
