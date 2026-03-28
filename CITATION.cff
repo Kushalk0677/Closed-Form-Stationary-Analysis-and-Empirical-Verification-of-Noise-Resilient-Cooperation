@@ -1,0 +1,28 @@
+cff-version: 1.2.0
+message: "If you use this code or data, please cite the associated paper."
+title: "Approximate Stationary Analysis and Empirical Verification of Noise-Resilient Cooperation in the Iterated Prisoner's Dilemma"
+type: software
+repository-code: "https://github.com/Kushalk0677/Closed-Form-Stationary-Analysis-and-Empirical-Verification-of-Noise-Resilient-Cooperation"
+license: MIT
+year: 2025
+abstract: >
+  Source code, simulation data, and figures for a study introducing NAFT
+  (Noisy Adaptive Forgiving Tit-for-Tat), a memory-1 strategy with controlled
+  stochastic forgiveness designed to maintain cooperative stability under
+  execution noise in the Iterated Prisoner's Dilemma. Includes Markov chain
+  stationary analysis, Monte Carlo simulations, and evolutionary dynamics.
+keywords:
+  - iterated prisoner's dilemma
+  - cooperation
+  - Markov chains
+  - Tit-for-Tat
+  - forgiveness
+  - evolutionary game theory
+  - multi-agent systems
+  - noise resilience
+preferred-citation:
+  type: article
+  title: "Approximate Stationary Analysis and Empirical Verification of Noise-Resilient Cooperation in the Iterated Prisoner's Dilemma"
+  journal: "Journal of Artificial Societies and Social Simulation"
+  year: 2025
+  status: under-review
